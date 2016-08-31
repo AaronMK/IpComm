@@ -29,12 +29,11 @@ namespace IpComm
 		OpResult  LastError;
 
 		TcpConnOpaque()
-			: LastError(OpResult::SUCCESS)
+			: LastError(OpResult::NONE)
 		{
 			WSADATA wsaData;
 			WSAStartup(MAKEWORD(2,2), &wsaData);
 
-			LastError = OpResult::NONE;
 			Socket = INVALID_SOCKET;
 			RemotePort = 0;
 		}

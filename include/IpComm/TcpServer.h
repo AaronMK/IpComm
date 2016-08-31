@@ -44,9 +44,10 @@ namespace IpComm
 		
 		/**
 		 * @brief
-		 *  Binds the server to the passed port on all IP Interfaces on the system.
+		 *  Binds the server to the passed port on all IP Interfaces with the 
+		 *  passed version on the system.
 		 */
-		OpResult bind(Port port);
+		OpResult bind(Port port, IpVersion version);
 		
 		/**
 		 * @brief
@@ -54,6 +55,8 @@ namespace IpComm
 		 *  of the system.
 		 */
 		OpResult bind(IpAddress addr, Port port);
+
+		bool isListening() const;
 
 		/**
 		 * @brief

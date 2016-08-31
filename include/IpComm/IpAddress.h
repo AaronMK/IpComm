@@ -29,6 +29,17 @@ namespace IpComm
 	class IP_COMM_EXPORT IpAddress final
 	{
 	public:
+		/**
+		 * @brief
+		 *  Returns an IP address that denotes "any" interface for
+		 *  the passed IP version.
+		 */
+		static IpAddress any(IpVersion version);
+
+		/**
+		 * @brief
+		 *  Constructs an invalid %IpAddress.
+		 */
 		IpAddress();
 
 		/**

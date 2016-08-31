@@ -6,11 +6,31 @@
 
 #include <windows.h>
 #include <ws2tcpip.h>
+#include <In6addr.h>
 
 #pragma comment(lib, "ws2_32.lib")
 
 namespace IpComm
 {
+	IpAddress IpAddress::any(IpVersion version)
+	{
+		if (IpVersion::V4 == version)
+		{
+			in_addr winAddr;
+			memset(&winAddr, 0, sizeof(in_addr));
+
+			winAddr.S_un.S_addr = INADDR_ANY;
+
+			return IpAddress(&winAddr);
+		}
+		else if (IpVersion::V6 == version)
+		{
+			return IpAddress(&in6addr_any);
+		}
+
+		return IpAddress();
+	}
+
 	IpAddress::IpAddress()
 	{
 		static_assert( sizeof(IpAddress::mData) >= sizeof(in_addr) &&
@@ -159,6 +179,9 @@ namespace Serialize
 {
 	using namespace IpComm;
 
+	/**
+	 * @nodocument
+	 */
 	static const std::string IP_INVALID("IP_INVALID");
 
 	template<>
