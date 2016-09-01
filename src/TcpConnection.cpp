@@ -1,60 +1,33 @@
 #include <IpComm/TcpConnection.h>
 
-#ifdef _WIN32
-#	define WIN32_LEAN_AND_MEAN
-
-#	include <windows.h>
-#	include <winsock2.h>
-#	include <ws2tcpip.h>
-
-#	pragma comment (lib, "Ws2_32.lib")
-#endif // _WIN32
+#include "private_include/TcpConnOpaque.h"
 
 #include <cassert>
 
 namespace IpComm
 {
-	/**
-	 * @internal
-	 *
-	 * @brief
-	 *  Opaque data and functionality for TcpConnection.
-	 */
-	struct TcpConnOpaque
+	TcpConnOpaque::TcpConnOpaque()
+		: LastError(OpResult::NONE)
 	{
-		SOCKET Socket;
+		WSADATA wsaData;
+		WSAStartup(MAKEWORD(2,2), &wsaData);
 
-		IpAddress RemoteIP;
-		Port      RemotePort;
-		OpResult  LastError;
+		Socket = INVALID_SOCKET;
+		RemotePort = 0;
+	}
 
-		TcpConnOpaque()
-			: LastError(OpResult::NONE)
-		{
-			WSADATA wsaData;
-			WSAStartup(MAKEWORD(2,2), &wsaData);
+	TcpConnOpaque::~TcpConnOpaque()
+	{
+		WSACleanup();
+	}
 
-			Socket = INVALID_SOCKET;
-			RemotePort = 0;
-		}
+	void TcpConnOpaque::setLastError(TcpConnection* connection, const OpResult error)
+	{
+		if (!connection->mInternal)
+			connection->mInternal.reset(new TcpConnOpaque());
 
-		~TcpConnOpaque()
-		{
-			WSACleanup();
-		}
-		
-		/**
-		 * @brief
-		 *  
-		 */
-		static void setLastError(TcpConnection* connection, const OpResult error)
-		{
-			if (!connection->mInternal)
-				connection->mInternal.reset(new TcpConnOpaque());
-
-			connection->mInternal->LastError = error;
-		}
-	};
+		connection->mInternal->LastError = error;
+	}
 
 	TcpConnection::TcpConnection()
 	{
@@ -63,6 +36,11 @@ namespace IpComm
 	TcpConnection::TcpConnection(TcpConnection&& other)
 	{
 		mInternal = std::move(other.mInternal);
+	}
+
+	TcpConnection::TcpConnection(std::unique_ptr<TcpConnOpaque>&& opaque)
+		: mInternal(std::move(opaque))
+	{
 	}
 
 	TcpConnection::~TcpConnection()
@@ -107,6 +85,12 @@ namespace IpComm
 			{
 				mInternal->RemoteIP = IP;
 				mInternal->RemotePort = port;
+
+				struct sockaddr_in addrLocal;
+				int addrLength = sizeof(sockaddr_in);
+				getsockname(mInternal->Socket, (sockaddr*)&addrLocal, &addrLength);
+				mInternal->LocalIP = IpAddress(&addrLocal.sin_addr);
+				mInternal->LocalPort = addrLocal.sin_port;
 
 				mInternal->LastError = OpResult::SUCCESS;
 				return true;
@@ -244,6 +228,16 @@ namespace IpComm
 	Port TcpConnection::remotePort() const
 	{
 		return ( isConnected() ) ? mInternal->RemotePort : 0;
+	}
+
+	IpAddress TcpConnection::localIp() const
+	{
+		return ( isConnected() ) ? mInternal->LocalIP : IpAddress();
+	}
+		
+	Port TcpConnection::localPort() const
+	{
+		return ( isConnected() ) ? mInternal->LocalPort : 0;
 	}
 
 	OpResult TcpConnection::getLastError() const

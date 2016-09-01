@@ -55,10 +55,15 @@ namespace IpComm
 
 		/**
 		 * @brief
-		 *  The operation failed because a connection has not been established or
-		 *  a server is not listening.
+		 *  The operation failed because a connection has not been established.
 		 */
 		static const OpResult NOT_CONNECTED;
+
+		/**
+		 * @brief
+		 *  The operation failed because the server is not listening.
+		 */
+		static const OpResult NOT_LISTENING;
 
 		/**
 		 * @brief
@@ -93,6 +98,12 @@ namespace IpComm
 		 *  means the pointer was null.
 		 */
 		static const OpResult CONNCETION_REJECTED;
+
+		/**
+		 * @brief
+		 *  The connection was reset.
+		 */
+		static const OpResult CONNCETION_RESET;
 
 		/**
 		 * @brief

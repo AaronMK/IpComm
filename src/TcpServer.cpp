@@ -1,16 +1,6 @@
 #include <IpComm/TcpServer.h>
 
-#ifdef _WIN32
-#	define WIN32_LEAN_AND_MEAN
-
-#	include <windows.h>
-#	include <winsock2.h>
-#	include <ws2tcpip.h>
-
-#	pragma comment (lib, "Ws2_32.lib")
-#endif // _WIN32
-
-#include <cassert>
+#include "private_include/TcpConnOpaque.h"
 
 namespace IpComm
 {
@@ -34,6 +24,7 @@ namespace IpComm
 
 		virtual ~TcpServerOpaque()
 		{
+			closesocket(Socket);
 			WSACleanup();
 		}
 	};
@@ -54,8 +45,47 @@ namespace IpComm
 
 	std::unique_ptr<TcpConnection> TcpServer::getClient()
 	{
-		mInternal->LastError = OpResult::NOT_IMPLEMENTED;
-		return std::unique_ptr<TcpConnection>();
+		if (false == isListening())
+		{
+			mInternal->LastError = OpResult::NOT_CONNECTED;
+			return nullptr;
+		}
+
+		sockaddr_in inAddr;
+		int addrLength = sizeof(sockaddr_in);
+
+		SOCKET acceptSocket = accept(mInternal->Socket, (sockaddr*)&inAddr, &addrLength);
+		
+		if (INVALID_SOCKET == acceptSocket)
+		{
+			switch (WSAGetLastError())
+			{
+			case WSAEINVAL:
+				mInternal->LastError = OpResult::NOT_LISTENING;
+				break;
+			case WSAECONNRESET:
+				mInternal->LastError = OpResult::CONNCETION_RESET;
+				break;
+			default:
+				mInternal->LastError = OpResult::INTERNAL_SUBSYSTEM_FAILURE;
+				break;
+			}
+			
+			return nullptr;
+		}
+
+		std::unique_ptr<TcpConnOpaque> ptrRet(new TcpConnOpaque());
+		ptrRet->Socket = acceptSocket;
+		ptrRet->RemoteIP = IpAddress(&inAddr.sin_addr);
+		ptrRet->RemotePort = inAddr.sin_port;
+
+		struct sockaddr_in addrLocal;
+		getsockname(ptrRet->Socket, (sockaddr*)&addrLocal, &addrLength);
+		ptrRet->LocalIP = IpAddress(&addrLocal.sin_addr);
+		ptrRet->LocalPort = mInternal->ListenPort;
+
+		mInternal->LastError = OpResult::SUCCESS;
+		return std::unique_ptr<TcpConnection>(new TcpConnection(std::move(ptrRet)));
 	}
 
 	OpResult TcpServer::bind(Port port, IpVersion version)
@@ -95,7 +125,8 @@ namespace IpComm
 			sockAddr.sin_port = htons(port);
 			addr.getSysAddress(&sockAddr.sin_addr);
 
-			if (0 == ::bind(mInternal->Socket, (sockaddr*)&sockAddr, sizeof(sockaddr_in)))
+			if ( 0 == ::bind(mInternal->Socket, (sockaddr*)&sockAddr, sizeof(sockaddr_in)) &&
+			     SOCKET_ERROR != listen(mInternal->Socket, SOMAXCONN))
 			{
 				mInternal->ListenIP = addr;
 				mInternal->ListenPort = port;

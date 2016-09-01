@@ -25,6 +25,7 @@ namespace IpComm
 	class IP_COMM_EXPORT TcpConnection
 	{
 	public:
+		friend class TcpServer;
 		friend struct TcpConnOpaque;
 
 		TcpConnection(const TcpConnection&) = delete;
@@ -115,7 +116,7 @@ namespace IpComm
 
 		/**
 		 * @brief
-		 *  Gets the remote %IpAddress of the connection.
+		 *  Gets the remote IP Address of the connection.
 		 */
 		IpAddress remoteIp() const;
 		
@@ -127,12 +128,30 @@ namespace IpComm
 
 		/**
 		 * @brief
+		 *  Gets the local IP Address.  When accepted by a TcpServer
+		 *  this will be the listening IP of the server that accepted
+		 *  the connection.
+		 */
+		IpAddress localIp() const;
+
+		/**
+		 * @brief
+		 *  Gets the local port.  When accepted by a TcpServer
+		 *  this will be the listening port of the server that accepted
+		 *  the connection.
+		 */
+		Port localPort() const;
+
+		/**
+		 * @brief
 		 *  If the last operation failed, returns details about
 		 *  the failure.  Otherwise OpResult::Success is returned.
 		 */
 		OpResult getLastError() const;
 
 	private:
+		TcpConnection(std::unique_ptr<TcpConnOpaque>&& opaque);
+
 		std::unique_ptr<TcpConnOpaque> mInternal;
 	};
 }
