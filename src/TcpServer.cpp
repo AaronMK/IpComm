@@ -40,7 +40,7 @@ namespace IpComm
 	
 	TcpServer::~TcpServer()
 	{
-
+		disconnect();
 	}
 
 	std::unique_ptr<TcpConnection> TcpServer::getClient()
@@ -155,11 +155,20 @@ namespace IpComm
 
 	bool TcpServer::isListening() const
 	{
-		return (INVALID_SOCKET != mInternal->Socket);
+		return ( mInternal && INVALID_SOCKET != mInternal->Socket);
 	}
 
 	void TcpServer::disconnect()
 	{
+		if (isListening())
+		{
+			closesocket(mInternal->Socket);
+			mInternal->Socket = INVALID_SOCKET;
+
+			mInternal->ListenIP = IpAddress();
+			mInternal->ListenPort = 0;
+		}
+
 		mInternal->LastError = OpResult::SUCCESS;
 	}
 

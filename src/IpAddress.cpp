@@ -179,9 +179,6 @@ namespace Serialize
 {
 	using namespace IpComm;
 
-	/**
-	 * @nodocument
-	 */
 	static const std::string IP_INVALID("IP_INVALID");
 
 	template<>
