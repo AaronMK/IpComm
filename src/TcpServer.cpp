@@ -33,8 +33,6 @@ namespace IpComm
 
 	TcpServer::TcpServer()
 	{
-		WSADATA wsaData;
-
 		mInternal.reset(new TcpServerOpaque());
 	}
 	
