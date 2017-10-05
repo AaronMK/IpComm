@@ -7,7 +7,6 @@
 #endif // _WIN32
 
 #include <IpComm/IpComm.h>
-#include <IpComm/OpResult.h>
 #include <IpComm/IpAddress.h>
 
 #include <cstdint>
@@ -61,12 +60,8 @@ namespace IpComm
 		 * @brief
 		 *  Attempts to connect to the passed IP and port, blocking
 		 *  until success or failure is determined.
-		 *
-		 * @return
-		 *  True if the connection is esablished. False if there was an error,
-		 *  for which getLastError() can be used to get additional details.
 		 */
-		bool connect(IpAddress ip, Port port);
+		void connect(IpAddress ip, Port port);
 		
 		/**
 		 * @brief
@@ -106,7 +101,7 @@ namespace IpComm
 		 * @brief
 		 *  Writes data onto the socket.
 		 */
-		bool write(const void* data, size_t byteLength);
+		void write(const void* data, size_t byteLength);
 
 		/**
 		 * @brief
@@ -141,13 +136,6 @@ namespace IpComm
 		 *  the connection.
 		 */
 		Port localPort() const;
-
-		/**
-		 * @brief
-		 *  If the last operation failed, returns details about
-		 *  the failure.  Otherwise OpResult::Success is returned.
-		 */
-		OpResult getLastError() const;
 
 	private:
 		TcpConnection(std::unique_ptr<TcpConnOpaque>&& opaque);

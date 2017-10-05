@@ -1,4 +1,5 @@
 #include <IpComm/TcpServer.h>
+#include <IpComm/Exceptions.h>
 
 #include "private_include/TcpConnOpaque.h"
 
@@ -6,14 +7,11 @@ namespace IpComm
 {
 	struct TcpServerOpaque
 	{
-		OpResult LastError;
-
 		SOCKET Socket;
 		IpAddress ListenIP;
 		Port      ListenPort;
 
 		TcpServerOpaque()
-			: LastError(OpResult::NONE)
 		{
 			WSADATA wsaData;
 			WSAStartup(MAKEWORD(2,2), &wsaData);
@@ -45,8 +43,7 @@ namespace IpComm
 	{
 		if (false == isListening())
 		{
-			mInternal->LastError = OpResult::NOT_CONNECTED;
-			return nullptr;
+			throw NotListening();
 		}
 
 		sockaddr_in inAddr;
@@ -59,13 +56,13 @@ namespace IpComm
 			switch (WSAGetLastError())
 			{
 			case WSAEINVAL:
-				mInternal->LastError = OpResult::NOT_LISTENING;
+				throw NotListening();
 				break;
 			case WSAECONNRESET:
-				mInternal->LastError = OpResult::CONNCETION_RESET;
+				throw ConnectionReset();
 				break;
 			default:
-				mInternal->LastError = OpResult::INTERNAL_SUBSYSTEM_FAILURE;
+				throw InternalSubsystemFailure();
 				break;
 			}
 			
@@ -82,28 +79,21 @@ namespace IpComm
 		ptrRet->LocalIP = IpAddress(&addrLocal.sin_addr);
 		ptrRet->LocalPort = mInternal->ListenPort;
 
-		mInternal->LastError = OpResult::SUCCESS;
 		return std::unique_ptr<TcpConnection>(new TcpConnection(std::move(ptrRet)));
 	}
 
-	OpResult TcpServer::bind(Port port, IpVersion version)
+	void TcpServer::bind(Port port, IpVersion version)
 	{
 		return bind(IpAddress::any(version), port);
 	}
 
-	OpResult TcpServer::bind(IpAddress addr, Port port)
+	void TcpServer::bind(IpAddress addr, Port port)
 	{
 		if ( isListening() )
-		{
-			mInternal->LastError = OpResult::ALREADY_CONNECTED;
-			return mInternal->LastError;
-		} 
-
-		else if (false == addr.isValid())
-		{
-			mInternal->LastError = OpResult::INVALID_IP_ADDRESS;
-			return mInternal->LastError;
-		}
+			throw AlreadyConnected();
+		
+		if (false == addr.isValid())
+			throw InvalidIpAddress();
 
 
 		if (addr.version() == IpVersion::V4)
@@ -111,10 +101,7 @@ namespace IpComm
 			mInternal->Socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
 			if (INVALID_SOCKET == mInternal->Socket)
-			{
-				mInternal->LastError = OpResult::INTERNAL_SUBSYSTEM_FAILURE;
-				return mInternal->LastError;
-			}
+				throw InternalSubsystemFailure();
 
 			sockaddr_in sockAddr;
 			memset(&sockAddr, 0, sizeof(sockaddr_in) );
@@ -129,26 +116,20 @@ namespace IpComm
 				mInternal->ListenIP = addr;
 				mInternal->ListenPort = port;
 
-				mInternal->LastError = OpResult::SUCCESS;
-				return mInternal->LastError;
+				return;
 			}
 			else
 			{
 				closesocket(mInternal->Socket);
 				mInternal->Socket = INVALID_SOCKET;
 
-				mInternal->LastError = OpResult::INTERNAL_SUBSYSTEM_FAILURE;
-				return mInternal->LastError;
+				throw InternalSubsystemFailure();
 			}
 		}
 		else if (addr.version() == IpVersion::V6)
 		{
-			mInternal->LastError = OpResult::NOT_IMPLEMENTED;
-			return mInternal->LastError;
+			throw NotImplemented("IPv6 server support not yet implemeneted.");
 		}
-
-		mInternal->LastError = OpResult::UNKNOWN_ERROR;
-		return mInternal->LastError;
 	}
 
 	bool TcpServer::isListening() const
@@ -166,12 +147,5 @@ namespace IpComm
 			mInternal->ListenIP = IpAddress();
 			mInternal->ListenPort = 0;
 		}
-
-		mInternal->LastError = OpResult::SUCCESS;
-	}
-
-	OpResult TcpServer::getLastError() const
-	{
-		return mInternal->LastError;
 	}
 }

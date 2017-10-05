@@ -1,5 +1,9 @@
 #include <IpComm/IpAddress.h>
 
+#include <Serialize/Exceptions.h>
+#include <Serialize/ByteStream.h>
+
+
 #ifdef _WIN32
 
 #define WIN32_LEAN_AND_MEAN
@@ -61,6 +65,11 @@ namespace IpComm
 		}
 	}
 
+	IpAddress::IpAddress(const std::string& addr)
+		: IpAddress(addr.c_str())
+	{
+	}
+
 	IpAddress::IpAddress(const char* addr, IpVersion version)
 	{
 		memset(mData, 0, sizeof(mData));
@@ -83,8 +92,12 @@ namespace IpComm
 			}
 		}
 	}
-
 	
+	IpAddress::IpAddress(const std::string& addr, IpVersion version)
+		: IpAddress(addr.c_str(), version)
+	{
+	}
+
 	IpAddress::IpAddress(const in_addr* addr)
 	{
 		mVersion = IpVersion::V4;
@@ -182,37 +195,24 @@ namespace Serialize
 	static const std::string IP_INVALID("IP_INVALID");
 
 	template<>
-	bool read<IpAddress>(ByteStream* stream, IpAddress *out)
+	void read<IpAddress>(ByteStream* stream, IpAddress *out)
 	{
-		seek_t seekBack = stream->getSeekPosition();
+		std::string strVal = stream->read<std::string>();
 
-		std::string strVal;
+		IpAddress addr(strVal);
 
-		if (read(stream, &strVal))
-		{
-			IpAddress addr;
-
-			if (addr.isValid() || IP_INVALID == strVal)
-			{
-				*out = IpAddress(strVal.c_str());
-				return true;
-			}
-			else
-			{
-				stream->seek(seekBack);
-				return false;
-			}
-		}
-
-		return false;
+		if (addr.isValid() || IP_INVALID == strVal)
+			*out = IpAddress(strVal.c_str());
+		else
+			throw Serialize::FormatException("'" + strVal + "' is not a valid IP Address.");
 	}
 
 	template<>
-	bool write<IpAddress>(ByteStream* stream, const IpAddress &val)
+	void write<IpAddress>(ByteStream* stream, const IpAddress &val)
 	{
 		if (val.isValid())
-			return write(stream, val.toString());
+			stream->write(val.toString());
 
-		return write(stream, IP_INVALID);
+		stream->write(IP_INVALID);
 	}
 }

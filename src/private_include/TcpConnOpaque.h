@@ -12,7 +12,7 @@
 #endif // _WIN32
 
 #include <IpComm/IpComm.h>
-#include <IpComm/OpResult.h>
+#include <IpComm/Exceptions.h>
 #include <IpComm/IpAddress.h>
 
 namespace IpComm
@@ -35,12 +35,8 @@ namespace IpComm
 		IpAddress LocalIP;
 		Port      LocalPort;
 
-		OpResult  LastError;
-
 		TcpConnOpaque();
 		virtual ~TcpConnOpaque();
-
-		static void setLastError(TcpConnection* connection, const OpResult error);
 	};
 }
 

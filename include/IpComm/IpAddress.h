@@ -51,11 +51,26 @@ namespace IpComm
 
 		/**
 		 * @brief
+		 *  Constructs an IP address from a string, automatically
+		 *  determining the version.
+		 */
+		IpAddress(const std::string& addr);
+
+		/**
+		 * @brief
 		 *  Constructs an IP address of the passed version from a string.
 		 *
 		 *  IPv4 addresses must be in dotted notation. (ie. 123.45.6.7)
 		 */
 		IpAddress(const char* addr, IpVersion version);
+
+		/**
+		 * @brief
+		 *  Constructs an IP address of the passed version from a string.
+		 *
+		 *  IPv4 addresses must be in dotted notation. (ie. 123.45.6.7)
+		 */
+		IpAddress(const std::string& addr, IpVersion version);
 
 		#ifdef _WIN32
 			IpAddress(const in_addr* addr);
@@ -83,10 +98,10 @@ namespace IpComm
 namespace Serialize
 {
 	template<>
-	IP_COMM_EXPORT bool read<IpComm::IpAddress>(ByteStream* stream, IpComm::IpAddress *out);
+	IP_COMM_EXPORT void read<IpComm::IpAddress>(ByteStream* stream, IpComm::IpAddress *out);
 
 	template<>
-	IP_COMM_EXPORT bool write<IpComm::IpAddress>(ByteStream* stream, const IpComm::IpAddress &val);
+	IP_COMM_EXPORT void write<IpComm::IpAddress>(ByteStream* stream, const IpComm::IpAddress &val);
 }
 
 #endif // _IP_COMM_IP_ADDRESS_H_

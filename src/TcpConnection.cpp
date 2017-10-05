@@ -1,4 +1,5 @@
 #include <IpComm/TcpConnection.h>
+#include <IpComm/Exceptions.h>
 
 #include "private_include/TcpConnOpaque.h"
 
@@ -7,7 +8,6 @@
 namespace IpComm
 {
 	TcpConnOpaque::TcpConnOpaque()
-		: LastError(OpResult::NONE)
 	{
 		WSADATA wsaData;
 		WSAStartup(MAKEWORD(2,2), &wsaData);
@@ -19,14 +19,6 @@ namespace IpComm
 	TcpConnOpaque::~TcpConnOpaque()
 	{
 		WSACleanup();
-	}
-
-	void TcpConnOpaque::setLastError(TcpConnection* connection, const OpResult error)
-	{
-		if (!connection->mInternal)
-			connection->mInternal.reset(new TcpConnOpaque());
-
-		connection->mInternal->LastError = error;
 	}
 
 	TcpConnection::TcpConnection()
@@ -48,17 +40,22 @@ namespace IpComm
 		disconnect();
 	}
 
-	bool TcpConnection::connect(IpAddress IP, Port port)
+	bool TcpConnection::accept()
+	{
+		throw NotImplemented();
+
+		return false;
+	}
+
+	void TcpConnection::connect(IpAddress IP, Port port)
 	{
 		if ( isConnected() )
 		{
-			mInternal->LastError = OpResult::ALREADY_CONNECTED;
-			return false;
+			throw AlreadyConnected();
 		} 
 		else if (false == IP.isValid())
 		{
-			TcpConnOpaque::setLastError(this, OpResult::INVALID_IP_ADDRESS);
-			return false;
+			throw InvalidIpAddress();
 		}
 
 		if (!mInternal)
@@ -69,10 +66,7 @@ namespace IpComm
 			mInternal->Socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
 			if (INVALID_SOCKET == mInternal->Socket)
-			{
-				mInternal->LastError = OpResult::INTERNAL_SUBSYSTEM_FAILURE;
-				return false;
-			}
+				throw InternalSubsystemFailure();
 
 			sockaddr_in sockAddr;
 			memset(&sockAddr, 0, sizeof(sockaddr_in) );
@@ -92,26 +86,20 @@ namespace IpComm
 				mInternal->LocalIP = IpAddress(&addrLocal.sin_addr);
 				mInternal->LocalPort = addrLocal.sin_port;
 
-				mInternal->LastError = OpResult::SUCCESS;
-				return true;
+				return;
 			}
 			else
 			{
 				closesocket(mInternal->Socket);
 				mInternal->Socket = INVALID_SOCKET;
 
-				mInternal->LastError = OpResult::INTERNAL_SUBSYSTEM_FAILURE;
-				return false;
+				throw InternalSubsystemFailure();
 			}
 		}
 		else if (IP.version() == IpVersion::V6)
 		{
-			// Need to implement
-			assert(false);
+			throw NotImplemented("IPv6 connection support not yet implemented.");
 		}
-
-		mInternal->LastError = OpResult::UNKNOWN_ERROR;
-		return false;
 	}
 
 	void TcpConnection::disconnect()
@@ -135,62 +123,51 @@ namespace IpComm
 	{
 		if (!isConnected())
 		{
-			TcpConnOpaque::setLastError(this, OpResult::NOT_CONNECTED);
-			return -1;
+			throw NotConnected();
 		}
 		else if (0 == size)
 		{
-			mInternal->LastError = OpResult::SUCCESS;
 			return 0;
 		}
 		else if (nullptr == buffer)
 		{
-			mInternal->LastError = OpResult::INVALID_BUFFER;
-			return -1;
+			throw std::invalid_argument("read buffer cannot be null.");
 		}
 		else
 		{
 			int flags = (fill) ? MSG_WAITALL : 0;
-			int readResult = recv(mInternal->Socket, (char*)buffer, size, flags);
+			int readResult = recv(mInternal->Socket, (char*)buffer, (int)size, flags);
 
 			if (readResult < 0)
 			{
 				switch (readResult)
 				{
 				case WSAENOTCONN:
-					mInternal->LastError = OpResult::NOT_CONNECTED;
 					disconnect();
-					return -1;
+					throw NotConnected();
 				case WSAECONNABORTED:
 				case WSAETIMEDOUT:
-					mInternal->LastError = OpResult::TIME_OUT;
 					disconnect();
+					throw TimeOut();
 					return -1;
 				default:
-					mInternal->LastError = OpResult::UNKNOWN_ERROR;
-					return -1;
+					throw UnknownError();
 				}
 			}
 
-			mInternal->LastError = OpResult::SUCCESS;
 			return readResult;
 		}
-
-		mInternal->LastError = OpResult::UNKNOWN_ERROR;
-		return 0;
 	}
 
-	bool TcpConnection::write(const void* data, size_t byteLength)
+	void TcpConnection::write(const void* data, size_t byteLength)
 	{
 		if (!isConnected())
 		{
-			mInternal->LastError = OpResult::NOT_CONNECTED;
-			return false;
+			throw NotConnected();
 		}
 		else if ( 0 == byteLength )
 		{
-			mInternal->LastError = OpResult::SUCCESS;
-			return true;
+			return;
 		}
 		else
 		{
@@ -198,13 +175,11 @@ namespace IpComm
 
 			if (sendResult > 0)
 			{
-				mInternal->LastError = OpResult::SUCCESS;
-				return true;
+				return;
 			}
 		}
 
-		mInternal->LastError = OpResult::UNKNOWN_ERROR;
-		return false;
+		throw UnknownError();
 	}
 
 	size_t TcpConnection::bytesAvailable() const
@@ -238,13 +213,5 @@ namespace IpComm
 	Port TcpConnection::localPort() const
 	{
 		return ( isConnected() ) ? mInternal->LocalPort : 0;
-	}
-
-	OpResult TcpConnection::getLastError() const
-	{
-		if (mInternal)
-			return mInternal->LastError;
-
-		return OpResult::NONE;
 	}
 }

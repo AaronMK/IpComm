@@ -47,14 +47,14 @@ namespace IpComm
 		 *  Binds the server to the passed port on all IP Interfaces with the 
 		 *  passed version on the system.
 		 */
-		OpResult bind(Port port, IpVersion version);
+		void bind(Port port, IpVersion version);
 		
 		/**
 		 * @brief
 		 *  Binds the server to the passed port on a specific Ip interface
 		 *  of the system.
 		 */
-		OpResult bind(IpAddress addr, Port port);
+		void bind(IpAddress addr, Port port);
 
 		bool isListening() const;
 
@@ -63,12 +63,6 @@ namespace IpComm
 		 *  Stops the server and frees the IP/Port combination.
 		 */
 		void disconnect();
-
-		/**
-		 * @brief
-		 *  Gets the error from the last function call.
-		 */
-		OpResult getLastError() const;
 
 	private:
 		std::unique_ptr<TcpServerOpaque> mInternal;
