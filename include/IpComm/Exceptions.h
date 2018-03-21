@@ -132,18 +132,6 @@ namespace IpComm
 		PortInUse(const char* message);
 		PortInUse(const std::string& message);
 	};
-	
-	/**
-	 * @brief
-	 *  The requested functionality has not been implemented.
-	 */
-	class IP_COMM_EXPORT NotImplemented : public std::runtime_error
-	{
-	public:
-		NotImplemented();
-		NotImplemented(const char* message);
-		NotImplemented(const std::string& message);
-	};
 
 	/**
 	 * @brief

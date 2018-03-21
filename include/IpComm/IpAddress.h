@@ -2,6 +2,7 @@
 #define _IP_COMM_IP_ADDRESS_H_
 
 #include "Config.h"
+#include "IpComm.h"
 
 #include <Serialize/Serialize.h>
 

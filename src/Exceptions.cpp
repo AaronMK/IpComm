@@ -204,26 +204,6 @@ namespace IpComm
 
 	////////////////////////////////////
 
-	NotImplemented::NotImplemented()
-		: runtime_error("The requested functionality has not been implemented.")
-	{
-
-	}
-
-	NotImplemented::NotImplemented(const char* message)
-		: runtime_error(message)
-	{
-
-	}
-
-	NotImplemented::NotImplemented(const std::string& message)
-		: runtime_error(message)
-	{
-
-	}
-
-	////////////////////////////////////
-
 	UnknownError::UnknownError()
 		: runtime_error("Unknown Error")
 	{

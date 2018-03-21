@@ -1,6 +1,8 @@
 #include <IpComm/TcpServer.h>
 #include <IpComm/Exceptions.h>
 
+#include <StdExt/Exceptions.h>
+
 #include "private_include/TcpConnOpaque.h"
 
 namespace IpComm
@@ -128,7 +130,7 @@ namespace IpComm
 		}
 		else if (addr.version() == IpVersion::V6)
 		{
-			throw NotImplemented("IPv6 server support not yet implemeneted.");
+			throw StdExt::not_implemented("IPv6 server support not yet implemeneted.");
 		}
 	}
 

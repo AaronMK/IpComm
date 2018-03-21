@@ -51,7 +51,7 @@ namespace IpComm
 
 		/**
 		 * @brief
-		 *  Acceots a connection.  This is only applicable for connections
+		 *  Accepts a connection.  This is only applicable for connections
 		 *  recieved by a TcpServer.
 		 */
 		bool accept();

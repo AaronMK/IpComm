@@ -1,6 +1,8 @@
 #include <IpComm/TcpConnection.h>
 #include <IpComm/Exceptions.h>
 
+#include <StdExt/Exceptions.h>
+
 #include "private_include/TcpConnOpaque.h"
 
 #include <cassert>
@@ -42,7 +44,7 @@ namespace IpComm
 
 	bool TcpConnection::accept()
 	{
-		throw NotImplemented();
+		throw StdExt::not_implemented();
 
 		return false;
 	}
@@ -98,7 +100,7 @@ namespace IpComm
 		}
 		else if (IP.version() == IpVersion::V6)
 		{
-			throw NotImplemented("IPv6 connection support not yet implemented.");
+			throw StdExt::not_implemented("IPv6 connection support not yet implemented.");
 		}
 	}
 
@@ -171,12 +173,8 @@ namespace IpComm
 		}
 		else
 		{
-			int sendResult = send(mInternal->Socket, (char*)data, byteLength, 0);
-
-			if (sendResult > 0)
-			{
+			if (send(mInternal->Socket, (char*)data, (int)byteLength, 0) > 0)
 				return;
-			}
 		}
 
 		throw UnknownError();
