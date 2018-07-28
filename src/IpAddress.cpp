@@ -45,7 +45,7 @@ namespace IpComm
 		mVersion = IpVersion::NONE;
 	}
 	
-	IpAddress::IpAddress(const char* addr)
+	IpAddress::IpAddress(std::string_view addr)
 		: IpAddress()
 	{
 		IpAddress addrTest(addr, IpVersion::V4);
@@ -65,12 +65,7 @@ namespace IpComm
 		}
 	}
 
-	IpAddress::IpAddress(const std::string& addr)
-		: IpAddress(addr.c_str())
-	{
-	}
-
-	IpAddress::IpAddress(const char* addr, IpVersion version)
+	IpAddress::IpAddress(std::string_view addr, IpVersion version)
 	{
 		memset(mData, 0, sizeof(mData));
 		mVersion = IpVersion::NONE;
@@ -78,7 +73,7 @@ namespace IpComm
 		if (IpVersion::V4 == version)
 		{
 			in_addr* addrPtr = reinterpret_cast<in_addr*>(&mData[0]);
-			if ( 1 == InetPton(AF_INET, addr, addrPtr) )
+			if ( 1 == InetPton(AF_INET, addr.data(), addrPtr) )
 			{
 				mVersion = IpVersion::V4;
 			}
@@ -86,16 +81,11 @@ namespace IpComm
 		else if (IpVersion::V6 == version)
 		{
 			in6_addr* addrPtr = reinterpret_cast<in6_addr*>(&mData[0]);
-			if ( 1 == InetPton(AF_INET6, addr, addrPtr) )
+			if ( 1 == InetPton(AF_INET6, addr.data(), addrPtr) )
 			{
 				mVersion = IpVersion::V6;
 			}
 		}
-	}
-	
-	IpAddress::IpAddress(const std::string& addr, IpVersion version)
-		: IpAddress(addr.c_str(), version)
-	{
 	}
 
 	IpAddress::IpAddress(const in_addr* addr)

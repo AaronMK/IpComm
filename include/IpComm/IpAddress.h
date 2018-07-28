@@ -48,14 +48,7 @@ namespace IpComm
 		 *  Constructs an IP address from a string, automatically
 		 *  determining the version.
 		 */
-		IpAddress(const char* addr);
-
-		/**
-		 * @brief
-		 *  Constructs an IP address from a string, automatically
-		 *  determining the version.
-		 */
-		IpAddress(const std::string& addr);
+		IpAddress(std::string_view addr);
 
 		/**
 		 * @brief
@@ -63,15 +56,7 @@ namespace IpComm
 		 *
 		 *  IPv4 addresses must be in dotted notation. (ie. 123.45.6.7)
 		 */
-		IpAddress(const char* addr, IpVersion version);
-
-		/**
-		 * @brief
-		 *  Constructs an IP address of the passed version from a string.
-		 *
-		 *  IPv4 addresses must be in dotted notation. (ie. 123.45.6.7)
-		 */
-		IpAddress(const std::string& addr, IpVersion version);
+		IpAddress(std::string_view addr, IpVersion version);
 
 		#ifdef _WIN32
 			IpAddress(const in_addr* addr);
