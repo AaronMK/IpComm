@@ -4,7 +4,9 @@
 #include "Config.h"
 #include "IpComm.h"
 
-#include <Serialize/Serialize.h>
+#include <Serialize/Binary/Binary.h>
+
+#include <StdExt/String.h>
 
 #include <cstdint>
 #include <string>
@@ -58,6 +60,13 @@ namespace IpComm
 		IpAddress(const std::string& addr);
 
 		/**
+		* @brief
+		*  Constructs an IP address from a string, automatically
+		*  determining the version.
+		*/
+		IpAddress(const StdExt::String& addr);
+
+		/**
 		 * @brief
 		 *  Constructs an IP address of the passed version from a string.
 		 *
@@ -73,6 +82,14 @@ namespace IpComm
 		 */
 		IpAddress(const std::string& addr, IpVersion version);
 
+		/**
+		* @brief
+		*  Constructs an IP address of the passed version from a string.
+		*
+		*  IPv4 addresses must be in dotted notation. (ie. 123.45.6.7)
+		*/
+		IpAddress(const StdExt::String& addr, IpVersion version);
+
 		#ifdef _WIN32
 			IpAddress(const in_addr* addr);
 			IpAddress(const in6_addr* addr);
@@ -85,7 +102,7 @@ namespace IpComm
 		bool operator==(const IpAddress &other) const;
 		bool operator<(const IpAddress &other) const;
 		
-		std::string toString() const;
+		StdExt::String toString() const;
 		IpVersion version() const;
 
 		bool isValid() const;
@@ -96,7 +113,7 @@ namespace IpComm
 	};
 }
 
-namespace Serialize
+namespace Serialize::Binary
 {
 	template<>
 	IP_COMM_EXPORT void read<IpComm::IpAddress>(ByteStream* stream, IpComm::IpAddress *out);

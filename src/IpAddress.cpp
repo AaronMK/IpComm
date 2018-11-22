@@ -1,7 +1,7 @@
 #include <IpComm/IpAddress.h>
 
 #include <Serialize/Exceptions.h>
-#include <Serialize/ByteStream.h>
+#include <Serialize/Binary/ByteStream.h>
 
 
 #ifdef _WIN32
@@ -13,6 +13,8 @@
 #include <In6addr.h>
 
 #pragma comment(lib, "ws2_32.lib")
+
+using namespace StdExt;
 
 namespace IpComm
 {
@@ -70,6 +72,11 @@ namespace IpComm
 	{
 	}
 
+	IpAddress::IpAddress(const StdExt::String& addr)
+		: IpAddress(addr.getNullTerminated().data())
+	{
+	}
+
 	IpAddress::IpAddress(const char* addr, IpVersion version)
 	{
 		memset(mData, 0, sizeof(mData));
@@ -95,6 +102,11 @@ namespace IpComm
 	
 	IpAddress::IpAddress(const std::string& addr, IpVersion version)
 		: IpAddress(addr.c_str(), version)
+	{
+	}
+
+	IpAddress::IpAddress(const StdExt::String& addr, IpVersion version)
+		: IpAddress(addr.getNullTerminated().data(), version)
 	{
 	}
 
@@ -129,7 +141,7 @@ namespace IpComm
 		return (memcmp(this, &other, sizeof(IpAddress)) < 0);
 	}
 
-	std::string IpAddress::toString() const
+	StdExt::String IpAddress::toString() const
 	{
 		if (isValid())
 		{
@@ -141,10 +153,10 @@ namespace IpComm
 			else if (IpVersion::V6 == mVersion)
 				InetNtop(AF_INET6, (void*)&mData[0], strBuffer, sizeof(strBuffer));
 
-			return std::string(strBuffer);
+			return StdExt::String(strBuffer);
 		}
 
-		return "";
+		return StringLiteral("");
 	}
 
 	IpVersion IpAddress::version() const
@@ -188,21 +200,23 @@ namespace IpComm
 #	error "SysComm::IpAddress not supported."
 #endif
 
-namespace Serialize
+namespace Serialize::Binary
 {
 	using namespace IpComm;
 
-	static const std::string IP_INVALID("IP_INVALID");
+	constexpr StringLiteral IP_INVALID("IP_INVALID");
 
 	template<>
 	void read<IpAddress>(ByteStream* stream, IpAddress *out)
 	{
-		std::string strVal = stream->read<std::string>();
+		StdExt::String strVal = stream->read<StdExt::String>();
 
 		IpAddress addr(strVal);
 
-		if (addr.isValid() || IP_INVALID == strVal)
-			*out = IpAddress(strVal.c_str());
+		if (addr.isValid() )
+			*out = addr;
+		else if(IP_INVALID == strVal)
+			*out = IpAddress();
 		else
 			throw Serialize::FormatException("'" + strVal + "' is not a valid IP Address.");
 	}
