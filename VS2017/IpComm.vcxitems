@@ -16,6 +16,7 @@
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\src\Exceptions.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\src\IpAddress.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\src\NetworkInterface.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\src\TcpConnection.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\src\TcpServer.cpp" />
   </ItemGroup>
@@ -24,8 +25,10 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\include\IpComm\Exceptions.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\include\IpComm\IpAddress.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\include\IpComm\IpComm.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\include\IpComm\NetworkInterface.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\include\IpComm\TcpConnection.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\include\IpComm\TcpServer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\src\private_include\StringConversion.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\src\private_include\TcpConnOpaque.h" />
   </ItemGroup>
 </Project>

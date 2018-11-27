@@ -148,10 +148,18 @@ namespace IpComm
 			char strBuffer[64];
 			memset(strBuffer, 0, sizeof(strBuffer));
 
+			sockaddr_in* sockIn = (sockaddr_in*)&mData[0];
+
 			if (IpVersion::V4 == mVersion)
-				InetNtop(AF_INET, (void*)&mData[0], strBuffer, sizeof(strBuffer));
+			{
+				in_addr* addr = (in_addr*)&mData[0];
+				inet_ntop(AF_INET, addr, strBuffer, sizeof(strBuffer));
+			}
 			else if (IpVersion::V6 == mVersion)
-				InetNtop(AF_INET6, (void*)&mData[0], strBuffer, sizeof(strBuffer));
+			{
+				in_addr6* addr = (in_addr6*)&mData[0];
+				inet_ntop(AF_INET6, addr, strBuffer, sizeof(strBuffer));
+			}
 
 			return StdExt::String(strBuffer);
 		}

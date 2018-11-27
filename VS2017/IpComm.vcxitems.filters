@@ -24,6 +24,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\src\TcpServer.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\src\NetworkInterface.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\src\private_include\TcpConnOpaque.h">
@@ -46,6 +49,12 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\include\IpComm\TcpServer.h">
       <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\include\IpComm\NetworkInterface.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\src\private_include\StringConversion.h">
+      <Filter>src\private_include</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
