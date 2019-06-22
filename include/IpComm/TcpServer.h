@@ -40,7 +40,7 @@ namespace IpComm
 		 *  to activate the conneciton.  To reject the connection, just let the returned pointer
 		 *  go out of scope.
 		 */
-		std::unique_ptr<TcpConnection> getClient();
+		TcpConnection getClient();
 		
 		/**
 		 * @brief

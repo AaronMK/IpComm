@@ -11,6 +11,7 @@
 #include <windows.h>
 #include <ws2tcpip.h>
 #include <In6addr.h>
+#include "..\include\IpComm\IpAddress.h"
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -21,18 +22,9 @@ namespace IpComm
 	IpAddress IpAddress::any(IpVersion version)
 	{
 		if (IpVersion::V4 == version)
-		{
-			in_addr winAddr;
-			memset(&winAddr, 0, sizeof(in_addr));
-
-			winAddr.S_un.S_addr = INADDR_ANY;
-
-			return IpAddress(&winAddr);
-		}
+			return IpAddress(&in4addr_any);
 		else if (IpVersion::V6 == version)
-		{
 			return IpAddress(&in6addr_any);
-		}
 
 		return IpAddress();
 	}
@@ -43,7 +35,6 @@ namespace IpComm
 		               sizeof(IpAddress::mData) >= sizeof(in6_addr),
 		               "Not enough local data to store system IpAddress data.");
 
-		memset(mData, 0, sizeof(mData));
 		mVersion = IpVersion::NONE;
 	}
 	
@@ -78,9 +69,9 @@ namespace IpComm
 	}
 
 	IpAddress::IpAddress(const char* addr, IpVersion version)
+		: IpAddress()
 	{
 		memset(mData, 0, sizeof(mData));
-		mVersion = IpVersion::NONE;
 
 		if (IpVersion::V4 == version)
 		{
@@ -112,33 +103,55 @@ namespace IpComm
 
 	IpAddress::IpAddress(const in_addr* addr)
 	{
+		memset(mData, 0, sizeof(mData));
+
 		mVersion = IpVersion::V4;
 		memcpy(&mData[0], addr, sizeof(in_addr));
 	}
 
 	IpAddress::IpAddress(const in6_addr* addr)
 	{
+		memset(mData, 0, sizeof(mData));
+
 		mVersion = IpVersion::V6;
 		memcpy(&mData[0], addr, sizeof(in6_addr));
 	}
 
 	IpAddress& IpAddress::operator=(const IpAddress &other)
 	{
-		memcpy(mData, other.mData, sizeof(mData));
 		mVersion = other.mVersion;
+
+		if (IpVersion::NONE != mVersion)
+			memcpy(mData, other.mData, sizeof(mData));
 
 		return *this;
 	}
 
 	bool IpAddress::operator==(const IpAddress &other) const
 	{
-		return ( 0 == memcmp(mData, &other.mData, sizeof(mData)) &&
-		         mVersion == other.mVersion);
+		if (mVersion != other.mVersion)
+			return false;
+		else if (IpVersion::NONE == mVersion)
+			return true;
+		else
+			return (0 == memcmp(mData, &other.mData, sizeof(mData)));
+	}
+
+	bool IpAddress::operator!=(const IpAddress& other) const
+	{
+		if (mVersion != other.mVersion)
+			return true;
+		else if (IpVersion::NONE == mVersion)
+			return false;
+		else
+			return (0 != memcmp(mData, &other.mData, sizeof(mData)));
 	}
 
 	bool IpAddress::operator<(const IpAddress &other) const
 	{
-		return (memcmp(this, &other, sizeof(IpAddress)) < 0);
+		return
+			mVersion < other.mVersion ||
+			(IpVersion::NONE != mVersion && memcmp(this, &other, sizeof(IpAddress)) < 0);
 	}
 
 	StdExt::String IpAddress::toString() const
@@ -147,8 +160,6 @@ namespace IpComm
 		{
 			char strBuffer[64];
 			memset(strBuffer, 0, sizeof(strBuffer));
-
-			sockaddr_in* sockIn = (sockaddr_in*)&mData[0];
 
 			if (IpVersion::V4 == mVersion)
 			{
@@ -212,29 +223,21 @@ namespace Serialize::Binary
 {
 	using namespace IpComm;
 
-	constexpr StringLiteral IP_INVALID("IP_INVALID");
-
 	template<>
 	void read<IpAddress>(ByteStream* stream, IpAddress *out)
 	{
-		StdExt::String strVal = stream->read<StdExt::String>();
+		out->mVersion = stream->read<IpVersion>();
 
-		IpAddress addr(strVal);
-
-		if (addr.isValid() )
-			*out = addr;
-		else if(IP_INVALID == strVal)
-			*out = IpAddress();
-		else
-			throw Serialize::FormatException("'" + strVal + "' is not a valid IP Address.");
+		if (IpVersion::NONE != out->mVersion)
+			stream->readRaw(out->mData, sizeof(out->mData));
 	}
 
 	template<>
 	void write<IpAddress>(ByteStream* stream, const IpAddress &val)
 	{
-		if (val.isValid())
-			stream->write(val.toString());
+		stream->write(val.mVersion);
 
-		stream->write(IP_INVALID);
+		if (IpVersion::NONE != val.mVersion)
+			stream->writeRaw(val.mData, sizeof(val.mData));
 	}
 }

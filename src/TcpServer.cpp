@@ -41,7 +41,7 @@ namespace IpComm
 		disconnect();
 	}
 
-	std::unique_ptr<TcpConnection> TcpServer::getClient()
+	TcpConnection TcpServer::getClient()
 	{
 		if (false == isListening())
 		{
@@ -73,15 +73,13 @@ namespace IpComm
 
 		std::unique_ptr<TcpConnOpaque> ptrRet(new TcpConnOpaque());
 		ptrRet->Socket = acceptSocket;
-		ptrRet->RemoteIP = IpAddress(&inAddr.sin_addr);
-		ptrRet->RemotePort = inAddr.sin_port;
+		ptrRet->RemoteEndPoint = IpEndpoint(IpAddress(&inAddr.sin_addr), inAddr.sin_port);
 
 		struct sockaddr_in addrLocal;
 		getsockname(ptrRet->Socket, (sockaddr*)&addrLocal, &addrLength);
-		ptrRet->LocalIP = IpAddress(&addrLocal.sin_addr);
-		ptrRet->LocalPort = mInternal->ListenPort;
+		ptrRet->LocalEndPoint = IpEndpoint(IpAddress(&addrLocal.sin_addr), mInternal->ListenPort);
 
-		return std::unique_ptr<TcpConnection>(new TcpConnection(std::move(ptrRet)));
+		return TcpConnection(std::move(ptrRet));
 	}
 
 	void TcpServer::bind(Port port, IpVersion version)

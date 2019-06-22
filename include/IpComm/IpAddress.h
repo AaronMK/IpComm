@@ -100,6 +100,7 @@ namespace IpComm
 
 		IpAddress& operator=(const IpAddress &other);
 		bool operator==(const IpAddress &other) const;
+		bool operator!=(const IpAddress& other) const;
 		bool operator<(const IpAddress &other) const;
 		
 		StdExt::String toString() const;
@@ -110,6 +111,9 @@ namespace IpComm
 	private:
 		uint8_t mData[16];
 		IpVersion mVersion;
+
+		friend void Serialize::Binary::read<IpAddress>(ByteStream*, IpAddress*);
+		friend void Serialize::Binary::write<IpAddress>(ByteStream*, const IpAddress&);
 	};
 }
 

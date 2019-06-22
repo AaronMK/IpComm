@@ -6,6 +6,7 @@
 #include "private_include/TcpConnOpaque.h"
 
 #include <cassert>
+#include "..\include\IpComm\TcpConnection.h"
 
 namespace IpComm
 {
@@ -13,9 +14,7 @@ namespace IpComm
 	{
 		WSADATA wsaData;
 		WSAStartup(MAKEWORD(2,2), &wsaData);
-
 		Socket = INVALID_SOCKET;
-		RemotePort = 0;
 	}
 
 	TcpConnOpaque::~TcpConnOpaque()
@@ -27,7 +26,7 @@ namespace IpComm
 	{
 	}
 
-	TcpConnection::TcpConnection(TcpConnection&& other)
+	TcpConnection::TcpConnection(TcpConnection&& other) noexcept
 	{
 		mInternal = std::move(other.mInternal);
 	}
@@ -40,6 +39,12 @@ namespace IpComm
 	TcpConnection::~TcpConnection()
 	{
 		disconnect();
+	}
+
+	TcpConnection& TcpConnection::operator=(TcpConnection&& RHS) noexcept
+	{
+		mInternal = std::move(RHS.mInternal);
+		return *this;
 	}
 
 	bool TcpConnection::accept()
@@ -79,14 +84,13 @@ namespace IpComm
 
 			if (0 == ::connect(mInternal->Socket, (sockaddr*)&sockAddr, sizeof(sockaddr_in)))
 			{
-				mInternal->RemoteIP = IP;
-				mInternal->RemotePort = port;
+				mInternal->RemoteEndPoint = IpEndpoint(IP, port);
 
 				struct sockaddr_in addrLocal;
 				int addrLength = sizeof(sockaddr_in);
 				getsockname(mInternal->Socket, (sockaddr*)&addrLocal, &addrLength);
-				mInternal->LocalIP = IpAddress(&addrLocal.sin_addr);
-				mInternal->LocalPort = addrLocal.sin_port;
+
+				mInternal->LocalEndPoint = IpEndpoint(IpAddress(&addrLocal.sin_addr), addrLocal.sin_port);
 
 				return;
 			}
@@ -111,8 +115,7 @@ namespace IpComm
 			closesocket(mInternal->Socket);
 			
 			mInternal->Socket = INVALID_SOCKET;
-			mInternal->RemoteIP = IpAddress();
-			mInternal->RemotePort = 0;
+			mInternal->RemoteEndPoint = IpEndpoint();
 		}
 	}
 
@@ -195,21 +198,31 @@ namespace IpComm
 
 	IpAddress TcpConnection::remoteIp() const
 	{
-		return ( isConnected() ) ? mInternal->RemoteIP : IpAddress();
+		return isConnected() ? mInternal->RemoteEndPoint.ip : IpAddress();
 	}
 		
 	Port TcpConnection::remotePort() const
 	{
-		return ( isConnected() ) ? mInternal->RemotePort : 0;
+		return isConnected() ? mInternal->RemoteEndPoint.port : 0;
+	}
+
+	IpEndpoint TcpConnection::remoteEndpoint() const
+	{
+		return isConnected() ? mInternal->RemoteEndPoint : IpEndpoint();
 	}
 
 	IpAddress TcpConnection::localIp() const
 	{
-		return ( isConnected() ) ? mInternal->LocalIP : IpAddress();
+		return isConnected() ? mInternal->LocalEndPoint.ip : IpAddress();
 	}
 		
 	Port TcpConnection::localPort() const
 	{
-		return ( isConnected() ) ? mInternal->LocalPort : 0;
+		return isConnected() ? mInternal->LocalEndPoint.port : 0;
+	}
+
+	IpEndpoint TcpConnection::localEndpoint() const
+	{
+		return isConnected() ? mInternal->LocalEndPoint : IpEndpoint();
 	}
 }

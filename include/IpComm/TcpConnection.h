@@ -7,7 +7,7 @@
 #endif // _WIN32
 
 #include <IpComm/IpComm.h>
-#include <IpComm/IpAddress.h>
+#include <IpComm/IpEndPoint.h>
 
 #include <cstdint>
 #include <memory>
@@ -29,7 +29,6 @@ namespace IpComm
 
 		TcpConnection(const TcpConnection&) = delete;
 		TcpConnection& operator=(const TcpConnection&) const = delete;
-		TcpConnection& operator=(TcpConnection&& RHS) = delete;
 
 		/**
 		 * @brief
@@ -41,13 +40,15 @@ namespace IpComm
 		 * @brief
 		 *  Transfers a connection and all its current state.
 		 */
-		TcpConnection(TcpConnection&& other);
+		TcpConnection(TcpConnection&& other) noexcept;
 
 		/**
 		 * @brief
 		 *  Destructor atuomatically closes the connection if it is open.
 		 */
 		virtual ~TcpConnection();
+
+		TcpConnection& operator=(TcpConnection&& RHS) noexcept;
 
 		/**
 		 * @brief
@@ -121,6 +122,13 @@ namespace IpComm
 		 */
 		Port remotePort() const;
 
+
+		/**
+		 * @brief
+		 *  Gets the remote end point of the connection.
+		 */
+		IpEndpoint remoteEndpoint() const;
+
 		/**
 		 * @brief
 		 *  Gets the local IP Address.  When accepted by a TcpServer
@@ -136,6 +144,14 @@ namespace IpComm
 		 *  the connection.
 		 */
 		Port localPort() const;
+
+		/**
+		 * @brief
+		 *  Gets the end point.  When accepted by a TcpServer
+		 *  this will be the end point of the server that accepted
+		 *  the connection.
+		 */
+		IpEndpoint localEndpoint() const;
 
 	private:
 		TcpConnection(std::unique_ptr<TcpConnOpaque>&& opaque);

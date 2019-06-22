@@ -19,15 +19,18 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\src\NetworkInterface.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\src\TcpConnection.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\src\TcpServer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\src\TcpStream.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\include\IpComm\Config.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\include\IpComm\Exceptions.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\include\IpComm\IpAddress.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\include\IpComm\IpComm.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\include\IpComm\IpEndPoint.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\include\IpComm\NetworkInterface.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\include\IpComm\TcpConnection.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\include\IpComm\TcpServer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\include\IpComm\TcpStream.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\src\private_include\StringConversion.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\src\private_include\TcpConnOpaque.h" />
   </ItemGroup>
