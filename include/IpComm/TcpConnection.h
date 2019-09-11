@@ -127,7 +127,7 @@ namespace IpComm
 		 * @brief
 		 *  Gets the remote end point of the connection.
 		 */
-		IpEndpoint remoteEndpoint() const;
+		IpEndPoint remoteEndpoint() const;
 
 		/**
 		 * @brief
@@ -151,7 +151,7 @@ namespace IpComm
 		 *  this will be the end point of the server that accepted
 		 *  the connection.
 		 */
-		IpEndpoint localEndpoint() const;
+		IpEndPoint localEndpoint() const;
 
 	private:
 		TcpConnection(std::unique_ptr<TcpConnOpaque>&& opaque);

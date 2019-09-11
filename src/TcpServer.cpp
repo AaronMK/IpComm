@@ -73,11 +73,11 @@ namespace IpComm
 
 		std::unique_ptr<TcpConnOpaque> ptrRet(new TcpConnOpaque());
 		ptrRet->Socket = acceptSocket;
-		ptrRet->RemoteEndPoint = IpEndpoint(IpAddress(&inAddr.sin_addr), inAddr.sin_port);
+		ptrRet->RemoteEndPoint = IpEndPoint(IpAddress(&inAddr.sin_addr), inAddr.sin_port);
 
 		struct sockaddr_in addrLocal;
 		getsockname(ptrRet->Socket, (sockaddr*)&addrLocal, &addrLength);
-		ptrRet->LocalEndPoint = IpEndpoint(IpAddress(&addrLocal.sin_addr), mInternal->ListenPort);
+		ptrRet->LocalEndPoint = IpEndPoint(IpAddress(&addrLocal.sin_addr), mInternal->ListenPort);
 
 		return TcpConnection(std::move(ptrRet));
 	}

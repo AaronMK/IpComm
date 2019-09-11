@@ -5,33 +5,33 @@
 
 namespace IpComm
 {
-	struct IpEndpoint
+	struct IpEndPoint
 	{
 		IpAddress ip;
 		Port port;
 
-		IpEndpoint()
+		IpEndPoint()
 		{
 			port = 0;
 		}
 
-		IpEndpoint(const IpAddress& _ip, Port _port)
+		IpEndPoint(const IpAddress& _ip, Port _port)
 			: ip(_ip), port(_port)
 		{
 			port = ip.isValid() ? _port : 0;
 		}
 
-		bool operator==(const IpEndpoint& other) const
+		bool operator==(const IpEndPoint& other) const
 		{
 			return (port == other.port && ip == other.ip);
 		}
 
-		bool operator!=(const IpEndpoint& other) const
+		bool operator!=(const IpEndPoint& other) const
 		{
 			return (port != other.port || ip != other.ip);
 		}
 
-		bool operator<(const IpEndpoint& other) const
+		bool operator<(const IpEndPoint& other) const
 		{
 			if (ip != other.ip)
 				return (ip < other.ip);

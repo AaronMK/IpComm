@@ -29,8 +29,8 @@ namespace IpComm
 	{
 		SOCKET Socket;
 
-		IpEndpoint RemoteEndPoint;
-		IpEndpoint LocalEndPoint;
+		IpEndPoint RemoteEndPoint;
+		IpEndPoint LocalEndPoint;
 
 		TcpConnOpaque();
 		virtual ~TcpConnOpaque();

@@ -31,6 +31,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\include\IpComm\TcpConnection.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\include\IpComm\TcpServer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\include\IpComm\TcpStream.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\include\IpComm\Udp.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\src\private_include\StringConversion.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\src\private_include\TcpConnOpaque.h" />
   </ItemGroup>

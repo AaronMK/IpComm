@@ -84,13 +84,13 @@ namespace IpComm
 
 			if (0 == ::connect(mInternal->Socket, (sockaddr*)&sockAddr, sizeof(sockaddr_in)))
 			{
-				mInternal->RemoteEndPoint = IpEndpoint(IP, port);
+				mInternal->RemoteEndPoint = IpEndPoint(IP, port);
 
 				struct sockaddr_in addrLocal;
 				int addrLength = sizeof(sockaddr_in);
 				getsockname(mInternal->Socket, (sockaddr*)&addrLocal, &addrLength);
 
-				mInternal->LocalEndPoint = IpEndpoint(IpAddress(&addrLocal.sin_addr), addrLocal.sin_port);
+				mInternal->LocalEndPoint = IpEndPoint(IpAddress(&addrLocal.sin_addr), addrLocal.sin_port);
 
 				return;
 			}
@@ -115,7 +115,7 @@ namespace IpComm
 			closesocket(mInternal->Socket);
 			
 			mInternal->Socket = INVALID_SOCKET;
-			mInternal->RemoteEndPoint = IpEndpoint();
+			mInternal->RemoteEndPoint = IpEndPoint();
 		}
 	}
 
@@ -206,9 +206,9 @@ namespace IpComm
 		return isConnected() ? mInternal->RemoteEndPoint.port : 0;
 	}
 
-	IpEndpoint TcpConnection::remoteEndpoint() const
+	IpEndPoint TcpConnection::remoteEndpoint() const
 	{
-		return isConnected() ? mInternal->RemoteEndPoint : IpEndpoint();
+		return isConnected() ? mInternal->RemoteEndPoint : IpEndPoint();
 	}
 
 	IpAddress TcpConnection::localIp() const
@@ -221,8 +221,8 @@ namespace IpComm
 		return isConnected() ? mInternal->LocalEndPoint.port : 0;
 	}
 
-	IpEndpoint TcpConnection::localEndpoint() const
+	IpEndPoint TcpConnection::localEndpoint() const
 	{
-		return isConnected() ? mInternal->LocalEndPoint : IpEndpoint();
+		return isConnected() ? mInternal->LocalEndPoint : IpEndPoint();
 	}
 }
